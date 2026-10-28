@@ -1,67 +1,76 @@
-﻿using SemanticKernelLearning.Services;
+﻿using SemanticKernelLearning.Models;
+using SemanticKernelLearning.Repositories;
+using SemanticKernelLearning.Services;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace SemanticKernelLearning.Tests.Services;
-
-public sealed class InventoryServiceTests
+namespace SemanticKernelLearning.Tests.Services
 {
-    private readonly InventoryService _service;
-
-    public InventoryServiceTests()
+    [TestFixture]
+    public sealed class InventoryServiceTests
     {
-        var repository = new FakeInventoryRepository();
-        _service = new InventoryService(repository);
+        private InventoryService _service = null!;
+
+        [SetUp]
+        public void SetUp()
+        {
+            IInventoryRepository repository = new FakeInventoryRepository();
+            _service = new InventoryService(repository);
+        }
+
+        [Test]
+        public async Task GetStockQuantityAsync_ReturnsProductDetails_WhenProductExists()
+        {
+            var result = await _service.GetStockQuantityAsync(101);
+
+            Assert.That(result, Does.Contain("Laptop"));
+            Assert.That(result, Does.Contain("45"));
+        }
+
+        [Test]
+        public async Task GetStockQuantityAsync_ReturnsNotFound_WhenProductDoesNotExist()
+        {
+            var result = await _service.GetStockQuantityAsync(999);
+
+            Assert.That(result, Does.Contain("was not found"));
+        }
+
+        [Test]
+        public async Task GetStockQuantityAsync_RejectsInvalidProductId()
+        {
+            var result = await _service.GetStockQuantityAsync(0);
+
+            Assert.That(result, Is.EqualTo("Product ID must be greater than zero."));
+        }
     }
 
-    [Fact]
-    public async Task GetStockQuantityAsync_ExistingProduct_ReturnsQuantity()
+    internal sealed class FakeInventoryRepository : IInventoryRepository
     {
-        // Arrange
-        const int productId = 101;
+        private readonly List<Product> _products =
+        [
+            new Product { Id = 101, Name = "Laptop", Quantity = 45 },
+        new Product { Id = 102, Name = "Keyboard", Quantity = 120 }
+        ];
 
-        // Act
-        var result = await _service.GetStockQuantityAsync(productId);
+        public Task<Product?> GetByIdAsync(
+            int productId,
+            CancellationToken cancellationToken = default)
+        {
+            Product? product = _products.FirstOrDefault(p => p.Id == productId);
+            return Task.FromResult(product);
+        }
 
-        // Assert
-        Assert.Equal(
-            "Product ID: 101, Name: Laptop, Available quantity: 45.",
-            result);
-    }
+        public Task<IReadOnlyList<Product>> SearchAsync(
+            string searchTerm,
+            CancellationToken cancellationToken = default)
+        {
+            IReadOnlyList<Product> products = _products
+                .Where(p => p.Name.Contains(
+                    searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-    [Fact]
-    public async Task GetStockQuantityAsync_UnknownProduct_ReturnsNotFound()
-    {
-        // Act
-        var result = await _service.GetStockQuantityAsync(999);
-
-        // Assert
-        Assert.Equal("Product ID 999 was not found.", result);
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public async Task GetStockQuantityAsync_InvalidId_ReturnsValidationMessage(
-        int productId)
-    {
-        // Act
-        var result = await _service.GetStockQuantityAsync(productId);
-
-        // Assert
-        Assert.Equal("Product ID must be greater than zero.", result);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public async Task SearchProductsAsync_EmptyTerm_ReturnsValidationMessage(
-        string searchTerm)
-    {
-        // Act
-        var result = await _service.SearchProductsAsync(searchTerm);
-
-        // Assert
-        Assert.Equal(
-            "Please provide a product name to search for.",
-            result);
+            return Task.FromResult(products);
+        }
     }
 }

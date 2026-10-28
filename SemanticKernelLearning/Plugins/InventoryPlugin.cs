@@ -29,4 +29,13 @@ public sealed class InventoryPlugin
     {
         return _inventoryService.SearchProductsAsync(searchTerm);
     }
+
+    [KernelFunction("GetStockByProductName")]
+    [Description("Gets the current stock quantity for a product using its name. Use this when the user asks about a product by name, such as Laptop or Mouse.")]
+    public Task<string> GetStockByProductNameAsync(
+    [Description("The product name provided by the user, such as Laptop. Do not use a numeric product ID here.")]
+    string productName)
+    {
+        return _inventoryService.GetStockByProductNameAsync(productName);
+    }
 }

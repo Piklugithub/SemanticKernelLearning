@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="SemanticKernelLearning.Tests/SemanticKernelLearning.Tests.csproj" Id="bb0e6143-b994-4eab-b277-7f41909ddfb7" />
+  <Project Path="SemanticKernelLearning.Tests/SemanticKernelLearning.Tests.csproj" Id="cb9b7a1d-7216-4f09-b5d9-9ccbdec662de" />
   <Project Path="SemanticKernelLearning/SemanticKernelLearning.csproj" />
 </Solution>

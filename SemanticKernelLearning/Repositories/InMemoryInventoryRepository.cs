@@ -8,10 +8,24 @@ public sealed class InMemoryInventoryRepository
 {
     private readonly List<Product> _products =
     [
-        new(101, "Laptop", 45),
-        new(102, "Keyboard", 120),
-        new(103, "Mouse", 80),
-        new(104, "Monitor", 25)
+        new Product
+        {
+            Id = 1,
+            Name = "Laptop",
+            Quantity = 45
+        },
+        new Product
+        {
+            Id = 2,
+            Name = "Keyboard",
+            Quantity = 120
+        },
+        new Product
+        {
+            Id = 3,
+            Name = "Mouse",
+            Quantity = 80
+        }
     ];
 
     public Task<Product?> GetByIdAsync(

@@ -45,4 +45,29 @@ public sealed class InventoryService
                 products.Select(p =>
                     $"ID: {p.Id}, Name: {p.Name}, Stock: {p.Quantity}"));
     }
+
+    public async Task<string> GetStockByProductNameAsync(
+    string productName,
+    CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(productName))
+            return "Please provide a product name.";
+
+        var products = await _repository.SearchAsync(
+            productName.Trim(), cancellationToken);
+
+        if (products.Count == 0)
+            return $"No product found matching '{productName}'.";
+
+        if (products.Count > 1)
+        {
+            return "Multiple products matched. Please specify a more precise name: " +
+                   string.Join(", ", products.Select(p => p.Name));
+        }
+
+        var product = products[0];
+
+        return $"Product: {product.Name}, Product ID: {product.Id}, " +
+               $"Available quantity: {product.Quantity}.";
+    }
 }

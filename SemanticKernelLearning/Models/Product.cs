@@ -4,8 +4,12 @@ using System.Text;
 
 namespace SemanticKernelLearning.Models
 {
-    public sealed record Product(
-    int Id,
-    string Name,
-    int Quantity);
+    public sealed class Product
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public int Quantity { get; set; }
+    }
 }
